@@ -1,0 +1,17 @@
+
+Engine API
+
+Maybe need layers? Or let this be done by other stuff...
+
+object: placeholder for a struct that hold information to render
+
+- void* init() - SDL2 init + set vars if needed
+- void* create_window() - create a window and return renderer
+- object* create_collision_object(size.x, size.y, x, y)
+- object* create_object(...)
+- delete(object*)
+
+game loop: timedelta
+
+# todo: how to move a object? -> just change object attributes x,y
+# Additional functions tbd

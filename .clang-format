@@ -1,0 +1,15 @@
+---
+BasedOnStyle: LLVM              # Use LLVM style as the base
+IndentWidth: 2                  # 2 spaces for indentation
+TabWidth: 2                     # Tabs are equivalent to 2 spaces
+UseTab: Never                   # Always use spaces, not tabs
+BreakBeforeBraces: Allman        # Braces on the same line for functions
+AllowShortIfStatementsOnASingleLine: false # Always use braces for if statements
+ColumnLimit: 100                  # No line length limit
+PointerAlignment: Left          # Align `*` with the type (e.g., `char *ptr`)
+SpaceAfterCStyleCast: true      # Add space after C-style casts
+AlignConsecutiveAssignments: true # Align `=` for readability
+AlignEscapedNewlines: Left      # Align escaped newlines to the left
+IndentCaseLabels: true          # Indent case labels under `switch`
+SortIncludes: false             # Preserve manual include order
+IncludeBlocks: Preserve         # Preserve include grouping
