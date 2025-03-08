@@ -10,15 +10,18 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 640
 #define WINDOW_TITLE "Test build"
 
-const float GRAVITY = 0.5f;
-const float JUMP_STRENGTH = -15.0f;
+const float GRAVITY = 0.8;
+const float JUMP_STRENGTH = -3.0f;
+const float MAX_JUMP_VELOCITY = -12.0f;
 const float SPEED = 100.0f;
 double delta_time;
+float accel;
 
 void raise_error(const char* msg)
 {
@@ -91,6 +94,8 @@ collision_map_t check_collision(SDL_Rect a, SDL_Rect b) {
 typedef struct {
     SDL_Rect rect; // Collision
     float vx, vy;  // Velocity
+    float target_speed;
+    float speed;
     bool on_ground;  // touching ground
     collision_map_t collision; // collision map
 } player_t;
@@ -116,20 +121,45 @@ void check_and_push_model(player_t* a, SDL_Rect b) {
         a->rect.y -= overlap_top;
         a->vy = 0;
         a->on_ground = true;
-        printf("TOP");
     } else if (map.bottom) {
         a->rect.y += overlap_bottom;
         a->vy = 0;
         a->on_ground = true;
-        printf("BOTTOM");
     }
 }
 
 
 void update_player(player_t* player)
 {
-  player->vy += GRAVITY * delta_time;
-  player->rect.y += player->vy * delta_time;
+
+  //pos_y = pos_y + (velocity_y * time_difference) + (gravity_y * (time_difference ^ 2) / 2)
+  //velocity_y = velocity_y + (acceleration_y * time_difference)
+  //player->rect.y += (player->vy * delta_time) + (GRAVITY * ( pow(delta_time, 2)) / 2);
+  //player->vy += player->vy + (accel * delta_time);
+  player->rect.y = player->rect.y + player->vy * delta_time;
+  player->vy = player->vy + 1 * delta_time;
+
+  float diff = player->target_speed - player->speed;
+  printf("Target: %f\n", player->target_speed);
+
+  if (!player->target_speed) {
+    player->speed = 0;
+    return;
+  }
+
+  if (diff > delta_time)
+    {
+      player->speed += delta_time * 0.1;
+    }
+  else if (diff < delta_time)
+    {
+      player->speed -= delta_time * 0.1;
+    }
+  else
+  {
+    player->speed = player->target_speed;
+  }
+  player->rect.x += player->speed;
 }
 
 int main(int argc, char* argv[])
@@ -145,7 +175,7 @@ int main(int argc, char* argv[])
   SDL_Window* window     = create_window();
   SDL_Renderer* renderer = register_renderer(window);
 
-  player_t player = {{100, 100, 100, 100}, 0.0f, 0.0f, false, {true, true, true, true}};
+  player_t player = {{100, 100, 100, 100}, 0.0f, 0.0f, 0.0f, 0.0f, false, {true, true, true, true}};
 
   int keys[SDL_NUM_SCANCODES] = {0};
 
@@ -153,6 +183,7 @@ int main(int argc, char* argv[])
   uint64_t current_time = SDL_GetPerformanceCounter();
   uint64_t last_time = 0;
   delta_time = 0.0;
+  accel = 1.0f;
   //int speed = 10;
   //float gravity = 9.8f;
   //float velocity = 0.0f;
@@ -180,12 +211,13 @@ int main(int argc, char* argv[])
       }
     }
 
-    last_time = current_time;
-    current_time = SDL_GetPerformanceCounter();
-    delta_time = (double)((current_time - last_time) * 1000 / (double)SDL_GetPerformanceFrequency() );
-    printf("%f\n", delta_time);
+    current_time = SDL_GetTicks();
+    delta_time = current_time - last_time;
+    //current_time = SDL_GetPerformanceCounter();
+    //delta_time = (double)((current_time - last_time) * 1000 / (double)SDL_GetPerformanceFrequency() );
+    if (delta_time > 0.15f)
+      delta_time = 0.15f;
 
-    // Bildschirm mit schwarzer Farbe füllen
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Schwarz
     SDL_RenderClear(renderer);
 
@@ -199,13 +231,34 @@ int main(int argc, char* argv[])
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
     if (keys[SDL_SCANCODE_SPACE] && player.on_ground)
     {
-      player.vy = JUMP_STRENGTH;
       player.on_ground = false;
+      player.vy = -20;
+      //player.vy += JUMP_STRENGTH * delta_time;
       printf("JUMP\n");
     }
+    if (keys[SDL_SCANCODE_D] | keys[SDL_SCANCODE_A])
+    {
+      double target_speed = 0;
+      if (keys[SDL_SCANCODE_D])
+      {
+        printf("D");
+        target_speed += 2;
+      }
+      if (keys[SDL_SCANCODE_A])
+      {
+        printf("A");
+        target_speed += -2;
+      }
+      player.target_speed = target_speed;
+    }
+    else {
+      player.target_speed = 0;
+    }
+
 
     update_player(&player);
     check_and_push_model(&player, rect);
+
     printf("%f\n", player.vy);
     /*if (keys[SDL_SCANCODE_S])
       player.y += speed;
@@ -235,6 +288,8 @@ int main(int argc, char* argv[])
 
     /* Render on screen */
     SDL_RenderPresent(renderer);
+    SDL_Delay(1);
+    last_time = current_time;
     //SDL_Delay(16);
   }
 

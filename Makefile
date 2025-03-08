@@ -1,6 +1,6 @@
 CC=gcc
 
-CFLAGS=-Wall -Werror -std=c99 -lSDL2 -g
+CFLAGS=-Wall -Werror -std=c99 -lSDL2 -g -lm
 SRC=$(wildcard src/*.c)
 
 format:
