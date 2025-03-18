@@ -4,7 +4,7 @@
 #include "../include/layer.h"
 #include "../include/error.h"
 
-int register_map(const char* filename, layer_t* layer)
+int register_map(const char* filename, texture_layer_t* layer)
 {
   int* map = malloc(sizeof(int) * MAP_WIDTH * MAP_HEIGHT);
   if (!map)

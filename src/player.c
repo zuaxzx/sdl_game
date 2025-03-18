@@ -1,37 +1,16 @@
 #include "../include/player.h"
 
-void update_player(player_t* player, double delta_time)
+void update_player(entity_t* player, double delta_time)
 {
-  player->rect.y = player->rect.y + player->vy * delta_time;
-  player->vy     = player->vy + 1 * delta_time;
+  player->rect.y = player->rect.y + player->vy * (float)delta_time / 80;
+  player->vy     = player->vy + 1 * (float)delta_time / 80;
 
-  float diff = player->target_speed - player->speed;
   printf("Target: %f\n", player->target_speed);
-
-  if (!player->target_speed)
-  {
-    player->speed = 0;
-    return;
-  }
-
-  if (diff > delta_time)
-  {
-    player->speed += delta_time * 0.1;
-  }
-  else if (diff < delta_time)
-  {
-    player->speed -= delta_time * 0.1;
-  }
-  else
-  {
-    player->speed = player->target_speed;
-  }
-  player->rect.x += player->speed;
 }
 
 
 // Function to push the player out of a collision
-void check_and_push_model(player_t* a, SDL_Rect b)
+void check_and_push_model(entity_t* a, SDL_Rect b)
 {
   collision_map_t map = check_collision(a->rect, b);
 
